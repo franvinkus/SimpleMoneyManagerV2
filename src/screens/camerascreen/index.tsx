@@ -1,17 +1,18 @@
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View, PermissionsAndroid, Platform, Alert } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View, PermissionsAndroid, Platform, Alert, ActivityIndicator } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { Camera, useCameraDevices } from 'react-native-vision-camera';
+import { Camera, useCameraDevice, useCameraDevices } from 'react-native-vision-camera';
 import { RootStackParamList } from '../../navigation/types';
 
 const CameraScreen = () => {
     const Navigate = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const camera = useRef<Camera>(null);
-    const [hasPermission, setHasPermission] = useState(false);
-    const devices = useCameraDevices();
-    const device = devices.find(d => d.position === 'back');
+    const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+    // const devices = useCameraDevices();
+    // const device = devices.find(d => d.position === 'back');
+    const device = useCameraDevice('back');
     const [photoPath, setPhotoPath] = useState<string | null>(null);
 
 
@@ -20,7 +21,7 @@ const CameraScreen = () => {
             const permission = await Camera.requestCameraPermission();
             console.log(permission);
             if (permission === 'granted') {
-                setHasPermission(true);
+                setHasPermission(permission === 'granted');
             } else {
                 setHasPermission(false);
             }
@@ -104,7 +105,26 @@ const CameraScreen = () => {
     };
 
 
-    if (device == null || !hasPermission) return <Text> Loading camera...</Text>;
+    if (hasPermission === null || device == null) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#000000" />
+                <Text>Memuat Kamera...</Text>
+            </View>
+        );
+    }
+
+    // Tahap 2: Tampilkan pesan jika izin ditolak.
+    if (hasPermission === false) {
+        return (
+            <View style={styles.loadingContainer}>
+                <Text>Izin kamera tidak diberikan.</Text>
+                <TouchableOpacity onPress={() => Navigate.goBack()}>
+                    <Text style={{ color: 'blue', marginTop: 10 , fontSize: 20}}>Kembali</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
 
     return (
         <View style={{ flex: 1 }}>
@@ -190,7 +210,7 @@ const styles = StyleSheet.create({
         height: 150,
         borderRadius: 8,
         marginTop: 5,
-    },
+    },loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });
 
 export default CameraScreen;

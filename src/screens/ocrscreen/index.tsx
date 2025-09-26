@@ -6,7 +6,7 @@ import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, Touchabl
 import { RootStackParamList } from '../../navigation/types';
 import { recognizeReceiptText } from '../../utils/ocrUtils';
 import { parseReceiptText } from '../../utils/receiptParser';
-import { preprocessImageForOCR } from '../../utils/imageProcessingUtils';
+// import { preprocessImageForOCR } from '../../utils/imageProcessingUtils';
 
 // Interface untuk logika perangkaian teks per elemen
 interface TextElement {

@@ -11,6 +11,7 @@ import {
     View        
 } from 'react-native'; 
 import { ModalProvider } from './src/context/modalContext';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 const App = () => {
@@ -18,12 +19,14 @@ const App = () => {
   return (
     // NavigationContainer manages your app's navigation tree.
     // All navigators must be wrapped inside a NavigationContainer.
-    <ModalProvider>
-      <NavigationContainer>
-        {/* AppNavigator defines the stack of screens for your application. */}
-        <AppNavigator />
-      </NavigationContainer>
-    </ModalProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ModalProvider>
+        <NavigationContainer>
+          {/* AppNavigator defines the stack of screens for your application. */}
+          <AppNavigator />
+        </NavigationContainer>
+      </ModalProvider>
+    </GestureHandlerRootView>
   );
 };
 
