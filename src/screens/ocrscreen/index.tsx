@@ -2,10 +2,10 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-// CATATAN: Import di bawah ini diasumsikan ada di proyek Anda.
 import { RootStackParamList } from '../../navigation/types';
 import { recognizeReceiptText } from '../../utils/ocrUtils';
 import { parseReceiptText } from '../../utils/receiptParser';
+import RNFS from 'react-native-fs';
 // import { preprocessImageForOCR } from '../../utils/imageProcessingUtils';
 
 // Interface untuk logika perangkaian teks per elemen

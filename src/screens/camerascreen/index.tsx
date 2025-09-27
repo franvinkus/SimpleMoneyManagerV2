@@ -5,6 +5,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View, PermissionsAndroid, Pl
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Camera, useCameraDevice, useCameraDevices } from 'react-native-vision-camera';
 import { RootStackParamList } from '../../navigation/types';
+import { normalizePath } from "../../utils/normalizePath";
 
 const CameraScreen = () => {
     const Navigate = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -90,7 +91,7 @@ const CameraScreen = () => {
         launchImageLibrary({
             mediaType: 'photo',
             selectionLimit: 1,
-        }, (response) => {
+        }, async (response) => {
             if (response.didCancel) {
                 console.log('Pengguna membatalkan pemilihan gambar');
             } else if (response.errorCode) {
@@ -98,10 +99,25 @@ const CameraScreen = () => {
             } else if (response.assets && response.assets.length > 0) {
                 const selectedImage = response.assets[0];
                 if (selectedImage.uri) {
-                    Navigate.navigate("Preview", { photoPath: selectedImage.uri });
+                    // const normalized = await normalizePath(selectedImage.uri);
+                    // console.log("✅ Normalized gallery path:", normalized);
+                    // Navigate.navigate("Preview", { photoPath: normalized });
+                    goToPreview(selectedImage.uri);
                 }
             }
         });
+    };
+
+    const goToPreview = async (path: string) => {
+        try {
+            console.log("Normalizing path:", path);
+            const normalizedPath = await normalizePath(path);
+            console.log("Path normalized to:", normalizedPath);
+            Navigate.navigate("Preview", { photoPath: normalizedPath });
+        } catch (e) {
+            console.error("Gagal menormalisasi path:", e);
+            Alert.alert("Error", "Gagal memproses gambar.");
+        }
     };
 
 
@@ -157,7 +173,7 @@ const CameraScreen = () => {
             {photoPath && (
                 <View style={styles.previewContainer}>
                     <Text style={{ color: 'white' }}>Preview:</Text>
-                    <TouchableOpacity onPress={() => Navigate.navigate("Preview", { photoPath })}>
+                    <TouchableOpacity onPress={() => goToPreview(photoPath)}>
                         <Image source={{ uri: 'file://' + photoPath }} style={styles.previewImage} />
                     </TouchableOpacity>
                 </View>

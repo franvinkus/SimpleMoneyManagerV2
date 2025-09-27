@@ -7,6 +7,7 @@ import PreviewScreen from '../screens/previewscreen';
 import OcrScreen from '../screens/ocrscreen';
 import ScanResultScreen from '../screens/scanresultscreen';
 import CalendarScreen from '../screens/calendarscreen';
+import SkiaProcessor from '../screens/SkiaPreprocessor';
 import { RootStackParamList } from './types';       // Impor tipe rute
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -47,6 +48,11 @@ const AppNavigator = () => {
       <Stack.Screen
         name="Calendar"
         component={CalendarScreen}
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen
+        name="SkiaProcessor"
+        component={SkiaProcessor}
         options={{ headerShown: false }} 
       />
     </Stack.Navigator>

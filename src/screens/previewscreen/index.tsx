@@ -5,6 +5,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-na
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import { RootStackParamList } from '../../navigation/types';
 import ImagePicker from 'react-native-image-crop-picker';
+import RNFS from 'react-native-fs'; 
 
 
 const PreviewScreen = () => {
@@ -45,12 +46,36 @@ const PreviewScreen = () => {
         }
     };
 
-    const handleAcceptPhoto = () => {
+    const handleAcceptPhoto = async () => {
         if (currentPhotoPath) {
             // Navigasi ke OcrScreen dan teruskan path foto yang sudah diedit
-            Navigate.navigate("OCR", { photoPath: currentPhotoPath });
+            // Navigate.navigate("OCR", { photoPath: currentPhotoPath });
+            console.log(`Path Image: ${currentPhotoPath}`);
+            const base64Data = await RNFS.readFile(currentPhotoPath, 'base64');
+            Navigate.navigate("SkiaProcessor", {photoPath: base64Data});
         } else {
             Alert.alert("Error", "Tidak ada foto untuk diproses.");
+        }
+    };
+
+    const copyAndNavigate = async () => {
+        if (!currentPhotoPath) {
+            Alert.alert("Error", "Tidak ada foto untuk diproses.");
+            return;
+        }
+        try {
+            const sourceUri = `file://${currentPhotoPath}`;
+            const newSafePath = `${RNFS.DocumentDirectoryPath}/${Date.now()}.jpg`;
+            
+            await RNFS.copyFile(sourceUri, newSafePath);
+            console.log('File disalin ke path aman:', newSafePath);
+            
+            // Ganti "SkiaProcessor" dengan "OcrScreen" jika itu adalah layar tujuan akhir Anda
+            Navigate.navigate("SkiaProcessor", { photoPath: newSafePath });
+
+        } catch (e) {
+            console.error("Gagal menyalin file:", e);
+            Alert.alert('Error', 'Gagal memproses gambar.');
         }
     };
 
@@ -65,7 +90,7 @@ const PreviewScreen = () => {
             <TouchableOpacity style={styles.editButton} onPress={handleEditPhoto}>
                 <Text style={{ color: 'white' }}>✂️</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.acceptButton} onPress={handleAcceptPhoto}>
+            <TouchableOpacity style={styles.acceptButton} onPress={copyAndNavigate}>
                 <Text style={{ color: 'white' }}>✔️</Text>
             </TouchableOpacity>
         </View>

@@ -12,6 +12,7 @@ export type RootStackParamList = {
     extractedItems: ItemDetail[];
   };
   Calendar: undefined;
+  SkiaProcessor: { photoPath: string };
 };
 
 export type ItemDetail = {
