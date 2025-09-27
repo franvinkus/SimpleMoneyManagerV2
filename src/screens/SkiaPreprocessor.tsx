@@ -70,9 +70,36 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
                 const mainSurface = Skia.Surface.Make(image.width(), image.height())!;
                 const mainCanvas = mainSurface.getCanvas();
                 const paint = Skia.Paint();
-                paint.setColorFilter(Skia.ColorFilter.MakeMatrix([
-                    brightnessFactor, 0, 0, 0, 0, 0, brightnessFactor, 0, 0, 0, 0, 0, brightnessFactor, 0, 0, 0, 0, 0, 1, 0,
-                ]));
+                const brightness = 1.0; // 1.0 = normal, >1 = lebih terang, <1 = lebih gelap
+                let contrast = 1.0;
+                let offset = 0;
+
+                if (brightnessFactor > 1.0) {
+                // Gambar gelap → tambahin brightness
+                    contrast = 3.5
+                    offset = 0;
+                    paint.setColorFilter(Skia.ColorFilter.MakeMatrix([
+                        contrast, 0, 0, 0, offset,
+                        0, contrast, 0, 0, offset,
+                        0, 0, contrast, 0, offset,
+                        0, 0, 0, 1, 0,
+                    ]));
+                } else if (brightnessFactor < 1.0) {
+                // Gambar terlalu terang → gelapin
+                    contrast = 1.5;  
+                    offset = 0;
+                    brightnessFactor = 0.3;
+                    paint.setColorFilter(Skia.ColorFilter.MakeMatrix([
+                        contrast * brightnessFactor, 0, 0, 0, offset,
+                        0, contrast * brightnessFactor, 0, 0, offset,
+                        0, 0, contrast * brightnessFactor, 0, offset,
+                        0, 0, 0, 1, 0,
+                    ]));
+                } else {
+                // Normal
+                contrast = 1.2;
+                offset = 0;
+                }
                 mainCanvas.drawImage(image, 0, 0, paint);
 
                 const finalSnapshot = mainSurface.makeImageSnapshot();
