@@ -77,9 +77,9 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
 
                 const finalSnapshot = mainSurface.makeImageSnapshot();
                 // Ganti tujuan ke direktori dokumen yang lebih stabil
-                const newPath = `${RNFS.CachesDirectoryPath}/${Date.now()}.png`;
+                const newPath = `${RNFS.CachesDirectoryPath}/${Date.now()}.jpeg`;
                 console.log("newPath: ", newPath);
-                const base64Data = finalSnapshot.encodeToBase64(ImageFormat.PNG, 90);
+                const base64Data = finalSnapshot.encodeToBase64(ImageFormat.JPEG, 100);
                 await RNFS.writeFile(newPath, base64Data, 'base64');
                 const finalPath = `file://${newPath}`; 
                 navigation.replace("OCR", { photoPath: finalPath });
