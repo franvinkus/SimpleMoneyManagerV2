@@ -77,12 +77,13 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
 
                 const finalSnapshot = mainSurface.makeImageSnapshot();
                 // Ganti tujuan ke direktori dokumen yang lebih stabil
-                const newPath = `${RNFS.DocumentDirectoryPath}/${Date.now()}.png`;
+                const newPath = `${RNFS.CachesDirectoryPath}/${Date.now()}.png`;
                 console.log("newPath: ", newPath);
                 const base64Data = finalSnapshot.encodeToBase64(ImageFormat.PNG, 90);
                 await RNFS.writeFile(newPath, base64Data, 'base64');
-                
-                navigation.replace("OCR", { photoPath: newPath });
+                const finalPath = `file://${newPath}`; 
+                navigation.replace("OCR", { photoPath: finalPath });
+                console.log("finalPath: ", finalPath);
 
             } catch (e) {
                 console.error("Gagal memproses gambar:", e);
