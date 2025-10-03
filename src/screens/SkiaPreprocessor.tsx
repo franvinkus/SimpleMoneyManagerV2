@@ -88,7 +88,7 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
                 // Gambar terlalu terang → gelapin
                     contrast = 1.5;  
                     offset = 0;
-                    brightnessFactor = 0.3;
+                    // brightnessFactor = 0.3;
                     paint.setColorFilter(Skia.ColorFilter.MakeMatrix([
                         contrast * brightnessFactor, 0, 0, 0, offset,
                         0, contrast * brightnessFactor, 0, 0, offset,
