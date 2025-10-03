@@ -42,6 +42,8 @@ export const recognizeReceiptText = async (imageUri: string): Promise<FinalOcrRe
         elements: line.elements.map((element: LibTextElement) => {
           
           // PERBAIKAN 1: Cek jika frame ada, dan berikan nilai default jika tidak ada
+
+           const filteredText = element.text.replace(/[^a-zA-Z0-9\s]/g, '');
           const frame = element.frame;
           const boundingBox: [number, number, number, number] = frame
             ? [
@@ -54,15 +56,23 @@ export const recognizeReceiptText = async (imageUri: string): Promise<FinalOcrRe
             : [0, 0, 0, 0]; // Nilai default jika frame tidak terdeteksi
 
           return {
-            text: element.text,
+            text: filteredText,
             boundingBox: boundingBox,
           };
         }),
       })),
     }));
+
+    const fullText = adaptedBlocks
+      .map(block => 
+        block.lines.map(line => 
+          line.elements.map(el => el.text).join(' ')
+        ).join('\n')
+      )
+      .join('\n');
     
     const finalResult: FinalOcrResult = {
-      text: resultFromLibrary.text,
+      text: fullText,
       blocks: adaptedBlocks,
     };
 

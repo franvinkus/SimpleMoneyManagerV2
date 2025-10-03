@@ -123,7 +123,7 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
 
     return (
         <View style={styles.container}>
-            <Canvas style={styles.hiddenCanvas} ref={canvasRef}>
+            {/* <Canvas style={styles.hiddenCanvas} ref={canvasRef}>
                 {image && (
                     <Image image={image} x={0} y={0} width={image.width()} height={image.height()} fit="contain">
                         <ColorMatrix matrix={[
@@ -134,7 +134,7 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
                         ]}/>
                     </Image>
                 )}
-            </Canvas>
+            </Canvas> */}
             <ActivityIndicator size="large" color="#ffffff" />
             <Text style={styles.loadingText}>{statusText}</Text>
         </View>
