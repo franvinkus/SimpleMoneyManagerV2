@@ -52,12 +52,16 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
                 const snapshot1x1 = surface1x1.makeImageSnapshot();
                 const pixel = snapshot1x1.readPixels();
 
-                let brightnessFactor = 1.0;
+                let brightnessFactor = 1.0; 
+                let darkestFactor = 2.1; 
+                let lightestFactor = 0; 
                 if (pixel) {
                     const [r, g, b] = Array.from(pixel);
                     const luminance = (r * 0.299 + g * 0.587 + b * 0.114);
                     if (luminance < BRIGHTNESS_THRESHOLD) brightnessFactor = 1.4;
+                    else if (luminance < brightnessFactor) brightnessFactor = darkestFactor;
                     else if (luminance > LIGHT_THRESHOLD) brightnessFactor = 0.7;
+                    else if (luminance > brightnessFactor) brightnessFactor = lightestFactor;
                 }
 
                 if (brightnessFactor === 1.0) {
@@ -76,7 +80,24 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
 
                 if (brightnessFactor > 1.0) {
                 // Gambar gelap → tambahin brightness
-                    contrast = 3.5
+                    contrast = 4.5;
+                    offset = 0;
+                    paint.setColorFilter(Skia.ColorFilter.MakeMatrix([
+                        contrast, 0, 0, 0, offset,
+                        0, contrast, 0, 0, offset,
+                        0, 0, contrast, 0, offset,
+                        0, 0, 0, 1, 0,
+                    ]));
+                }else if (brightnessFactor > 2.0) {
+                // Gambar gelap banget → tambahin brightness 
+                /*
+                1.di contrast "12" itu brightnessnya kayak normal, cuma ntah knp 
+                sharpness image(kyknya) malah jadi kacau jadi malah berantakan;
+                2.di contrast 12 itu gw nyobanya di if state pertama, ntah kenapa 
+                di else if kyknya gk ke execute? contrastnya di ganti gk berpengaruh buat yg darkest
+                3.di else if buat lightest keknya juga gk ke execute
+                */
+                    contrast = 12;// -> semestinya di 12 ok
                     offset = 0;
                     paint.setColorFilter(Skia.ColorFilter.MakeMatrix([
                         contrast, 0, 0, 0, offset,
@@ -85,8 +106,19 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
                         0, 0, 0, 1, 0,
                     ]));
                 } else if (brightnessFactor < 1.0) {
+                // Gambar lumayan terang → gelapin
+                    contrast = 1.1;  
+                    offset = 0;
+                    // brightnessFactor = 0.3;
+                    paint.setColorFilter(Skia.ColorFilter.MakeMatrix([
+                        contrast * brightnessFactor, 0, 0, 0, offset,
+                        0, contrast * brightnessFactor, 0, 0, offset,
+                        0, 0, contrast * brightnessFactor, 0, offset,
+                        0, 0, 0, 1, 0,
+                    ]));
+                } else if (brightnessFactor < 0.5) {
                 // Gambar terlalu terang → gelapin
-                    contrast = 1.5;  
+                    contrast = 0;  
                     offset = 0;
                     // brightnessFactor = 0.3;
                     paint.setColorFilter(Skia.ColorFilter.MakeMatrix([
