@@ -10,9 +10,6 @@ import { RootStackParamList } from '../navigation/types';
 import RNFS from 'react-native-fs';
 import { Canvas, Image, useImage, ColorMatrix, useCanvasRef, Skia, ImageFormat } from '@shopify/react-native-skia';
 
-const BRIGHTNESS_THRESHOLD = 80;
-const LIGHT_THRESHOLD = 200;
-
 type SkiaProcessorScreenProps = NativeStackScreenProps<RootStackParamList, 'SkiaProcessor'>;
 
 const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
@@ -20,7 +17,7 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
     // PERBAIKAN 1 (Lanjutan): Beri tipe yang spesifik pada useNavigation
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const [statusText, setStatusText] = useState('Memulai proses...');
-    const [brightnessFactor, setBrightnessFactor] = useState<number | null>(null);
+    // const [brightnessFactor, setBrightnessFactor] = useState<number | null>(null);
 
     const canvasRef = useCanvasRef();
     const imageUri = `file://${photoPath}`;
@@ -45,23 +42,45 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
 
                 // TAHAP 2: Deteksi Brightness
                 setStatusText('Mendeteksi kecerahan...');
-                const surface1x1 = Skia.Surface.Make(1, 1)!;
-                const canvas1x1 = surface1x1.getCanvas();
+                const SAMPLE_SIZE = 8;
+                const surface = Skia.Surface.Make(SAMPLE_SIZE, SAMPLE_SIZE)!;
+                const canvas = surface.getCanvas();
                 const paint1x1 = Skia.Paint();
-                canvas1x1.drawImageRect(image, { x: 0, y: 0, width: image.width(), height: image.height() }, { x: 0, y: 0, width: 1, height: 1 }, paint1x1);
-                const snapshot1x1 = surface1x1.makeImageSnapshot();
-                const pixel = snapshot1x1.readPixels();
+                canvas.drawImageRect(image, { x: 0, y: 0, width: image.width(), height: image.height() }, { x: 0, y: 0, width: SAMPLE_SIZE, height: SAMPLE_SIZE }, paint1x1);
+                const snapshot1x1 = surface.makeImageSnapshot();
+                const pixels = snapshot1x1.readPixels();
 
                 let brightnessFactor = 1.0; 
-                let darkestFactor = 2.1; 
-                let lightestFactor = 0; 
-                if (pixel) {
-                    const [r, g, b] = Array.from(pixel);
-                    const luminance = (r * 0.299 + g * 0.587 + b * 0.114);
-                    if (luminance < BRIGHTNESS_THRESHOLD) brightnessFactor = 1.4;
-                    else if (luminance < brightnessFactor) brightnessFactor = darkestFactor;
-                    else if (luminance > LIGHT_THRESHOLD) brightnessFactor = 0.7;
-                    else if (luminance > brightnessFactor) brightnessFactor = lightestFactor;
+                let totalLuminance = 0;
+                let count = 0;  
+                let avgLuminance = 0;
+                
+                if (pixels) {
+
+                    for (let i = 0; i < pixels.length; i += 4) {
+                        const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
+                        totalLuminance += (r * 0.299 + g * 0.587 + b * 0.114);
+                        count++;
+                    }
+                    
+                    avgLuminance = totalLuminance / count;
+
+                    if (avgLuminance < 30) {
+                    // 🔴 Sangat gelap
+                    brightnessFactor = 2.4;
+                    } 
+                    else if (avgLuminance < 60) {
+                    // 🟠 Gelap
+                    brightnessFactor = 1.4;
+                    }
+                    else if (avgLuminance < 240) {
+                    // 🟢 Terang
+                    brightnessFactor = 0.7;
+                    }
+                    else {
+                    // 🔵 Sangat terang
+                    brightnessFactor = 0.1;
+                    }
                 }
 
                 if (brightnessFactor === 1.0) {
@@ -78,7 +97,7 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
                 let contrast = 1.0;
                 let offset = 0;
 
-                if (brightnessFactor > 1.0) {
+                if (brightnessFactor > 1.0 && brightnessFactor < 1.7) {
                 // Gambar gelap → tambahin brightness
                     contrast = 4.5;
                     offset = 0;
@@ -90,14 +109,7 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
                     ]));
                 }else if (brightnessFactor > 2.0) {
                 // Gambar gelap banget → tambahin brightness 
-                /*
-                1.di contrast "12" itu brightnessnya kayak normal, cuma ntah knp 
-                sharpness image(kyknya) malah jadi kacau jadi malah berantakan;
-                2.di contrast 12 itu gw nyobanya di if state pertama, ntah kenapa 
-                di else if kyknya gk ke execute? contrastnya di ganti gk berpengaruh buat yg darkest
-                3.di else if buat lightest keknya juga gk ke execute
-                */
-                    contrast = 12;// -> semestinya di 12 ok
+                    contrast = 12;
                     offset = 0;
                     paint.setColorFilter(Skia.ColorFilter.MakeMatrix([
                         contrast, 0, 0, 0, offset,
@@ -105,7 +117,7 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
                         0, 0, contrast, 0, offset,
                         0, 0, 0, 1, 0,
                     ]));
-                } else if (brightnessFactor < 1.0) {
+                } else if (brightnessFactor < 1.0 && brightnessFactor > 0.3) {
                 // Gambar lumayan terang → gelapin
                     contrast = 1.1;  
                     offset = 0;
@@ -118,9 +130,9 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
                     ]));
                 } else if (brightnessFactor < 0.5) {
                 // Gambar terlalu terang → gelapin
-                    contrast = 0;  
-                    offset = 0;
-                    // brightnessFactor = 0.3;
+                    contrast = 6.5;  
+                    offset = 0.1;
+                    // brightnessFactor = 0.1;
                     paint.setColorFilter(Skia.ColorFilter.MakeMatrix([
                         contrast * brightnessFactor, 0, 0, 0, offset,
                         0, contrast * brightnessFactor, 0, 0, offset,
@@ -133,6 +145,8 @@ const SkiaProcessor: React.FC<SkiaProcessorScreenProps> = ({ route }) => {
                 offset = 0;
                 }
                 mainCanvas.drawImage(image, 0, 0, paint);
+                console.log("Luminance:", avgLuminance, "Factor:", brightnessFactor);
+
 
                 const finalSnapshot = mainSurface.makeImageSnapshot();
                 // Ganti tujuan ke direktori dokumen yang lebih stabil
