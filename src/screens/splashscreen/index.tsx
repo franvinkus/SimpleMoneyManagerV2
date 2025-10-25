@@ -13,7 +13,7 @@ const SplashScreen = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       navigation.replace('Home'); 
-    }, 0); // Tampilkan splash selama 2 detik
+    }, 2000); // Tampilkan splash selama 2 detik
 
     return () => clearTimeout(timeout);
   }, []);
