@@ -124,8 +124,6 @@ const OcrScreen = () => {
           {resultText && (
             <ScrollView style={styles.resultScrollView}>
               <View style={styles.resultBox}>
-                <Text style={styles.resultTitle}>Hasil Teks OCR:</Text>
-                <Text style={styles.resultText}>{resultText}</Text>
                 <TouchableOpacity style={styles.acceptButton} onPress={handleAccept}>
                   <Text style={{ color: 'white', fontSize: 24 }}>✔️</Text>
                 </TouchableOpacity>
@@ -146,10 +144,10 @@ const styles = StyleSheet.create({
     button: { backgroundColor: '#F8CEA8', paddingVertical: 15, borderRadius: 10, alignItems: 'center' },
     buttonText: { fontSize: 18, fontWeight: '600', color: '#333' },
     resultScrollView: { maxHeight: 200, marginTop: 20 },
-    resultBox: { backgroundColor: '#2a2a2a', padding: 15, borderRadius: 10, position: 'relative' },
+    resultBox: { padding: 15, borderRadius: 10, position: 'relative' , marginTop: 50 },
     resultTitle: { color: '#F8CEA8', fontSize: 16, fontWeight: 'bold', marginBottom: 10 },
     resultText: { color: 'white', fontSize: 14, fontFamily: 'monospace', },
-    acceptButton: { position: 'absolute', bottom: 15, right: 15, padding: 15, backgroundColor: '#000000aa', borderRadius: 30 },
+    acceptButton: { position: 'absolute', bottom: 15, right: 150, padding: 15, backgroundColor: '#000000aa', borderRadius: 10 },
 });
 
 export default OcrScreen;

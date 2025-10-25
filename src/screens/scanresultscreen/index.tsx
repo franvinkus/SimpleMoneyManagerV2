@@ -87,12 +87,6 @@ const ScanResultScreen = () => {
             <Text style={styles.dataText}>Tidak ada barang yang terdeteksi.</Text>
           )}
         </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Teks Mentah Hasil OCR</Text>
-          <Text style={styles.rawText}>{rawOcrText || 'Tidak ada teks.'}</Text>
-        </View>
-
         <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={isSaving}>
           <Text style={styles.saveButtonText}>
             {isSaving ? 'Menyimpan...' : 'Simpan Transaksi'}
