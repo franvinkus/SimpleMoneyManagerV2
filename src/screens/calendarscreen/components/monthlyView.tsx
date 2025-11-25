@@ -25,7 +25,14 @@ const MonthlyView = ({ date, details }: monthlyProps) => {
     }, {} as { [key: string]: DailyData[] });
 
     const totalMonthly = details.reduce((sum, currentDay) => {
-        return sum + currentDay.total;
+
+        if(currentDay.type === "expense"){
+            return sum - currentDay.total;
+        }
+        else if(currentDay.type === "income"){
+            return sum + currentDay.total;
+        }
+        return sum;
     }, 0);
 
     return(
